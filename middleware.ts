@@ -11,7 +11,7 @@ export async function middleware(request:NextRequest){
  const key=process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
  if(!url||!key){if(isProtected){const dest=request.nextUrl.clone();dest.pathname='/login';dest.searchParams.set('next',pathname);return NextResponse.redirect(dest)}return NextResponse.next({request});}
  let response=NextResponse.next({request});
- const supabase=createServerClient(url,key,{cookies:{getAll(){return request.cookies.getAll()},setAll(cookies){cookies.forEach(({name,value})=>request.cookies.set(name,value));response=NextResponse.next({request});cookies.forEach(({name,value,options})=>response.cookies.set(name,value,options))}}});
+ const supabase=createServerClient(url,key,{cookies:{getAll(){return request.cookies.getAll()},setAll(cookies: { name: string; value: string; options?: any }[]){cookies.forEach(({name,value})=>request.cookies.set(name,value));response=NextResponse.next({request});cookies.forEach(({name,value,options})=>response.cookies.set(name,value,options))}}});
  const {data:{user},error}=await supabase.auth.getUser();
  if(isProtected&&(!user||error)){const dest=request.nextUrl.clone();dest.pathname='/login';dest.searchParams.set('next',pathname);const redirect=NextResponse.redirect(dest);response.cookies.getAll().forEach(cookie=>redirect.cookies.set(cookie));return redirect}
  if(isAuth&&user){const dest=request.nextUrl.clone();dest.pathname='/dashboard';dest.search='';const redirect=NextResponse.redirect(dest);response.cookies.getAll().forEach(cookie=>redirect.cookies.set(cookie));return redirect}
